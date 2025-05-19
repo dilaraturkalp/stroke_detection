@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 import torchvision.transforms as T
 
-# Model loading attempt
+
 model_loaded = False
 try:
     from fastai.vision.all import *
@@ -25,7 +25,7 @@ except Exception as e:
 
 # Prediction function
 def predict_stroke(img):
-    # If model not loaded
+    
     if not model_loaded:
         return {
             "Stroke Present": 0.5, 
@@ -41,11 +41,9 @@ def predict_stroke(img):
         if not isinstance(img, Image.Image):
             img = Image.fromarray(img)
             
-        # Basit bir beyin görüntüsü kontrolü
-        # Bu örnek bir kontrol - gerçek uygulamada daha gelişmiş bir model kullanılmalı
+        
         img_array = np.array(img)
-        if len(img_array.shape) == 3:  # Renkli görüntü
-            # Beyin görüntüleri genellikle gri tonlamalıdır
+        if len(img_array.shape) == 3:  
             if not np.allclose(img_array[:,:,0], img_array[:,:,1]) or not np.allclose(img_array[:,:,1], img_array[:,:,2]):
                 return {"Stroke Present": 0.0, "No Stroke": 0.0}, "Warning: This image does not appear to be a brain CT scan. Please upload a valid brain CT scan."
         
@@ -58,7 +56,7 @@ def predict_stroke(img):
         
         img_tensor = transform(img).unsqueeze(0)
         
-        # Use GPU if available
+
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         img_tensor = img_tensor.to(device)
         learn.model.to(device)
@@ -75,7 +73,7 @@ def predict_stroke(img):
         # Determine which class has higher probability
         predicted_class = "Stroke Present" if stroke_prob > no_stroke_prob else "No Stroke"
         
-        # Prepare results
+
         results = {
             "Stroke Present": stroke_prob,
             "No Stroke": no_stroke_prob
@@ -88,19 +86,19 @@ def predict_stroke(img):
         print(f"Prediction error: {str(e)}")
         return {"Stroke Present": 0.0, "No Stroke": 0.0}, f"Error: {str(e)}"
 
-# Define example images
+
 stroke_examples = [
-    "10036.png",  # Example with stroke
-    "10101.png",  # Example with stroke
-    "109 (8).jpg",  # Example with stroke
-    "17032.png",  # Example with stroke
-    "17028.png",  # Example with stroke
+    "10036.png", 
+    "10101.png", 
+    "109 (8).jpg", 
+    "17032.png", 
+    "17028.png",  
 ]
 
 no_stroke_examples = [
-    "10083.png",  # Example without stroke
-    "10086.png",  # Example without stroke
-    "10087.png", # Example without stroke
+    "10083.png",  
+    "10086.png", 
+    "10087.png", 
     "17033.png" ,
     "17031.png" 
 ]
@@ -147,6 +145,6 @@ with gr.Blocks(title="Stroke Detection from CT Scans") as demo:
     gr.Markdown("## Important Note")
     gr.Markdown("This is a demonstration tool only and should not be used for actual medical diagnosis. Always consult with a qualified healthcare professional.")
 
-# Start the application
+
 if __name__ == "__main__":
     demo.launch()
